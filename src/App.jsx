@@ -347,11 +347,13 @@ export default function FruitStandApp() {
   const [newFruitName, setNewFruitName] = useState("");
   const [newFruitEmoji, setNewFruitEmoji] = useState("🍎");
   const [openCard, setOpenCard] = useState(null); // null | "purchase" | "sale" | "expense"
+  const [otherNote, setOtherNote] = useState("");
 
   const toggleCard = (id) => {
     setPickedFruit(null);
     setPickedCat(null);
     setAmount("");
+    setOtherNote("");
     setOpenCard((prev) => (prev === id ? null : id));
   };
 
@@ -387,6 +389,7 @@ export default function FruitStandApp() {
     setSplitEntries([]);
     setSplitFruit(null);
     setOpenCard(null);
+    setOtherNote("");
   };
 
   /* ---------- 今日彙總 ---------- */
@@ -423,16 +426,22 @@ export default function FruitStandApp() {
   const handleSaveBuy = async () => {
     const v = Number(amount);
     if (!v || v <= 0) { showToast("請輸入金額"); return; }
-    await addEntry({ type: "進貨", fruit: pickedFruit.name, emoji: pickedFruit.emoji, amount: v });
-    showToast(`已記下${pickedFruit.name}進貨 ${fmtMoney(v)} 元`);
+    const isOther = pickedFruit.id === "other";
+    if (isOther && !otherNote.trim()) { showToast("請輸入是什麼水果"); return; }
+    const fruitName = isOther ? otherNote.trim() : pickedFruit.name;
+    await addEntry({ type: "進貨", fruit: fruitName, emoji: pickedFruit.emoji, amount: v });
+    showToast(`已記下${fruitName}進貨 ${fmtMoney(v)} 元`);
     goHome();
   };
 
   const handleSaveExpense = async () => {
     const v = Number(amount);
     if (!v || v <= 0) { showToast("請輸入金額"); return; }
-    await addEntry({ type: "支出", fruit: pickedCat.name, emoji: pickedCat.emoji, amount: v });
-    showToast(`已記下${pickedCat.name} ${fmtMoney(v)} 元`);
+    const isOther = pickedCat.id === "other";
+    if (isOther && !otherNote.trim()) { showToast("請輸入是什麼支出"); return; }
+    const catName = isOther ? otherNote.trim() : pickedCat.name;
+    await addEntry({ type: "支出", fruit: catName, emoji: pickedCat.emoji, amount: v });
+    showToast(`已記下${catName} ${fmtMoney(v)} 元`);
     goHome();
   };
 
@@ -650,15 +659,33 @@ export default function FruitStandApp() {
           ) : (
             <>
               <div style={{ fontSize: 18 * scale, fontWeight: 800, color: THEME.ink, marginBottom: 6 }}>
-                {pickedFruit.emoji} {pickedFruit.name}　今天這批買多少錢？
+                {pickedFruit.emoji} {pickedFruit.name}
+                {pickedFruit.id !== "other" && "　今天這批買多少錢？"}
               </div>
+              {pickedFruit.id === "other" && (
+                <>
+                  <div style={{ fontSize: 15 * scale, color: THEME.crateSoft, marginBottom: 8, fontWeight: 700 }}>
+                    是什麼水果？
+                  </div>
+                  <input
+                    value={otherNote}
+                    onChange={(e) => setOtherNote(e.target.value)}
+                    placeholder="例如：釋迦"
+                    className="w-full rounded-2xl px-4 mb-4"
+                    style={{ height: 54, fontSize: 18, backgroundColor: THEME.white, border: `2px solid ${THEME.line}`, color: THEME.ink }}
+                  />
+                  <div style={{ fontSize: 15 * scale, color: THEME.crateSoft, marginBottom: 8, fontWeight: 700 }}>
+                    買多少錢？
+                  </div>
+                </>
+              )}
               <div
                 className="rounded-2xl flex items-center justify-center mb-4"
                 style={{ height: 90, backgroundColor: THEME.white, border: `2px solid ${THEME.line}` }}
               >
                 <span style={{ fontSize: 30, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
                 <input
-                  autoFocus
+                  autoFocus={pickedFruit.id !== "other"}
                   inputMode="numeric"
                   pattern="[0-9]*"
                   value={amount}
@@ -675,7 +702,7 @@ export default function FruitStandApp() {
                 💾 儲存
               </button>
               <button
-                onClick={() => setPickedFruit(null)}
+                onClick={() => { setPickedFruit(null); setOtherNote(""); }}
                 className="w-full text-center"
                 style={{ color: THEME.crateSoft, fontSize: 15 * scale, fontWeight: 700 }}
               >
@@ -747,15 +774,33 @@ export default function FruitStandApp() {
           ) : (
             <>
               <div style={{ fontSize: 18 * scale, fontWeight: 800, color: THEME.ink, marginBottom: 6 }}>
-                {pickedCat.emoji} {pickedCat.name}　花了多少錢？
+                {pickedCat.emoji} {pickedCat.name}
+                {pickedCat.id !== "other" && "　花了多少錢？"}
               </div>
+              {pickedCat.id === "other" && (
+                <>
+                  <div style={{ fontSize: 15 * scale, color: THEME.crateSoft, marginBottom: 8, fontWeight: 700 }}>
+                    是什麼支出？
+                  </div>
+                  <input
+                    value={otherNote}
+                    onChange={(e) => setOtherNote(e.target.value)}
+                    placeholder="例如：買繩子"
+                    className="w-full rounded-2xl px-4 mb-4"
+                    style={{ height: 54, fontSize: 18, backgroundColor: THEME.white, border: `2px solid ${THEME.line}`, color: THEME.ink }}
+                  />
+                  <div style={{ fontSize: 15 * scale, color: THEME.crateSoft, marginBottom: 8, fontWeight: 700 }}>
+                    花了多少錢？
+                  </div>
+                </>
+              )}
               <div
                 className="rounded-2xl flex items-center justify-center mb-4"
                 style={{ height: 90, backgroundColor: THEME.white, border: `2px solid ${THEME.line}` }}
               >
                 <span style={{ fontSize: 30, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
                 <input
-                  autoFocus
+                  autoFocus={pickedCat.id !== "other"}
                   inputMode="numeric"
                   pattern="[0-9]*"
                   value={amount}
@@ -772,7 +817,7 @@ export default function FruitStandApp() {
                 💾 儲存
               </button>
               <button
-                onClick={() => setPickedCat(null)}
+                onClick={() => { setPickedCat(null); setOtherNote(""); }}
                 className="w-full text-center"
                 style={{ color: THEME.crateSoft, fontSize: 15 * scale, fontWeight: 700 }}
               >
