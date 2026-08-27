@@ -242,7 +242,7 @@ function ConfirmModal({ open, title, message, confirmText = "確定", cancelText
   return (
     <div
       className="fixed inset-0 flex items-center justify-center px-6"
-      style={{ backgroundColor: "rgba(59,42,26,0.45)", zIndex: 50 }}
+      style={{ backgroundColor: "rgba(59,42,26,0.45)", zIndex: 60 }}
     >
       <div className="w-full rounded-2xl p-5" style={{ backgroundColor: THEME.white, maxWidth: 360 }}>
         <div style={{ fontSize: 19, fontWeight: 800, color: THEME.ink, marginBottom: 8 }}>{title}</div>
@@ -605,7 +605,7 @@ export default function FruitStandApp() {
           <button
             onClick={() => setView("leftover")}
             className="w-full text-center mt-3"
-            style={{ color: THEME.crateSoft, fontSize: 15 * scale, fontWeight: 700, textDecoration: "underline" }}
+            style={{ color: THEME.crateSoft, fontSize: 15 * scale, fontWeight: 700, textDecoration: "underline", marginBottom: 48 }}
           >
             今天還有剩貨嗎？（選填）
           </button>
@@ -1105,6 +1105,7 @@ export default function FruitStandApp() {
         )}
         <CurrentView />
         <div style={{ height: 40 }} />
+        <EditModal />
         <ConfirmModal
           open={!!confirmModal}
           title={confirmModal?.title}
@@ -1115,7 +1116,6 @@ export default function FruitStandApp() {
           onConfirm={confirmModal?.onConfirm}
           onCancel={confirmModal?.onCancel}
         />
-        <EditModal />
         <Toast message={toast} />
       </div>
     </div>
