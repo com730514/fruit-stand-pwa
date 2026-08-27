@@ -622,6 +622,21 @@ export default function FruitStandApp() {
 
   const scale = settings.fontScale || 1;
 
+  /* ---- 常用水果排序：依歷史進貨次數，把最常用的排前面（「其他」永遠排最後） ---- */
+  const sortedFruits = useMemo(() => {
+    const countMap = {};
+    entries.forEach((e) => {
+      if (e.type === "進貨") countMap[e.fruit] = (countMap[e.fruit] || 0) + 1;
+    });
+    const list = [...settings.fruits];
+    list.sort((a, b) => {
+      if (a.id === "other") return 1;
+      if (b.id === "other") return -1;
+      return (countMap[b.name] || 0) - (countMap[a.name] || 0);
+    });
+    return list;
+  }, [settings.fruits, entries]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: THEME.paper }}>
@@ -649,9 +664,9 @@ export default function FruitStandApp() {
         >
           {!pickedFruit ? (
             <>
-              <div style={{ fontSize: 16 * scale, color: THEME.crateSoft, marginBottom: 12, fontWeight: 700 }}>先選水果</div>
+              <div style={{ fontSize: 16 * scale, color: THEME.crateSoft, marginBottom: 12, fontWeight: 700 }}>先選水果（常用的排前面）</div>
               <div className="grid grid-cols-3 gap-3">
-                {settings.fruits.map((f) => (
+                {sortedFruits.map((f) => (
                   <GridPickButton key={f.id} emoji={f.emoji} label={f.name} onClick={() => { setPickedFruit(f); setAmount(""); }} />
                 ))}
               </div>
@@ -683,7 +698,7 @@ export default function FruitStandApp() {
                 className="rounded-2xl flex items-center justify-center mb-4"
                 style={{ height: 90, backgroundColor: THEME.white, border: `2px solid ${THEME.line}` }}
               >
-                <span style={{ fontSize: 30, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
+                <span style={{ fontSize: 34 * scale, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
                 <input
                   autoFocus={pickedFruit.id !== "other"}
                   inputMode="numeric"
@@ -691,8 +706,11 @@ export default function FruitStandApp() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
                   className="text-center bg-transparent outline-none"
-                  style={{ fontSize: 30, fontWeight: 800, color: THEME.ink, width: "55%" }}
+                  style={{ fontSize: 34 * scale, fontWeight: 800, color: THEME.ink, width: "55%" }}
                 />
+              </div>
+              <div style={{ fontSize: 13 * scale, color: THEME.crateSoft, marginBottom: 12, textAlign: "center" }}>
+                🎤 也可以點手機鍵盤上的小麥克風，直接說出數字
               </div>
               <button
                 onClick={handleSaveBuy}
@@ -726,7 +744,7 @@ export default function FruitStandApp() {
             className="rounded-2xl flex items-center justify-center mb-4"
             style={{ height: 90, backgroundColor: THEME.white, border: `2px solid ${THEME.line}` }}
           >
-            <span style={{ fontSize: 30, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
+            <span style={{ fontSize: 34 * scale, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
             <input
               autoFocus
               inputMode="numeric"
@@ -734,8 +752,11 @@ export default function FruitStandApp() {
               value={amount}
               onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
               className="text-center bg-transparent outline-none"
-              style={{ fontSize: 30, fontWeight: 800, color: THEME.ink, width: "55%" }}
+              style={{ fontSize: 34 * scale, fontWeight: 800, color: THEME.ink, width: "55%" }}
             />
+          </div>
+          <div style={{ fontSize: 13 * scale, color: THEME.crateSoft, marginBottom: 12, textAlign: "center" }}>
+            🎤 也可以點手機鍵盤上的小麥克風，直接說出數字
           </div>
           <button
             onClick={handleSaveSellTotal}
@@ -798,7 +819,7 @@ export default function FruitStandApp() {
                 className="rounded-2xl flex items-center justify-center mb-4"
                 style={{ height: 90, backgroundColor: THEME.white, border: `2px solid ${THEME.line}` }}
               >
-                <span style={{ fontSize: 30, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
+                <span style={{ fontSize: 34 * scale, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
                 <input
                   autoFocus={pickedCat.id !== "other"}
                   inputMode="numeric"
@@ -806,8 +827,11 @@ export default function FruitStandApp() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
                   className="text-center bg-transparent outline-none"
-                  style={{ fontSize: 30, fontWeight: 800, color: THEME.ink, width: "55%" }}
+                  style={{ fontSize: 34 * scale, fontWeight: 800, color: THEME.ink, width: "55%" }}
                 />
+              </div>
+              <div style={{ fontSize: 13 * scale, color: THEME.crateSoft, marginBottom: 12, textAlign: "center" }}>
+                🎤 也可以點手機鍵盤上的小麥克風，直接說出數字
               </div>
               <button
                 onClick={handleSaveExpense}
