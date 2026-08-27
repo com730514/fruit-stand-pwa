@@ -606,12 +606,13 @@ export default function FruitStandApp() {
           <button
             onClick={() => setView("leftover")}
             className="w-full text-center mt-3"
-            style={{ color: THEME.crateSoft, fontSize: 15 * scale, fontWeight: 700, textDecoration: "underline", marginBottom: 48 }}
+            style={{ color: THEME.crateSoft, fontSize: 15 * scale, fontWeight: 700, textDecoration: "underline" }}
           >
             今天還有剩貨嗎？（選填）
           </button>
         )}
       </div>
+      <div style={{ height: 60 }} />
     </div>
   );
 
@@ -1081,35 +1082,64 @@ export default function FruitStandApp() {
     settings: SettingsView,
   };
   const CurrentView = views[view] || HomeView;
+  const isHome = view === "home";
 
   return (
     <div className="min-h-screen w-full flex justify-center" style={{ backgroundColor: THEME.paper }}>
       <div className="w-full relative" style={{ maxWidth: 440, minHeight: "100vh" }}>
-        {view === "home" && (
-          <div className="absolute" style={{ top: 20, right: 18, zIndex: 10 }}>
-            <button
-              onClick={() => setView("settings")}
-              className="flex items-center justify-center rounded-full"
-              style={{ width: 44, height: 44, backgroundColor: THEME.paperDeep, color: THEME.crate, fontSize: 20 }}
-              aria-label="設定"
-            >
-              ⚙️
-            </button>
-          </div>
-        )}
-        {view === "history" && (
-          <div className="px-5 pt-2">
-            <button
-              onClick={() => setView("monthReport")}
-              className="w-full rounded-2xl mb-4 active:opacity-80"
-              style={{ height: 54, backgroundColor: THEME.crate, color: THEME.white, fontSize: 16, fontWeight: 800 }}
-            >
-              📊 查看本月報表
-            </button>
-          </div>
-        )}
-        <CurrentView />
+        <div className="absolute" style={{ top: 20, right: 18, zIndex: 10 }}>
+          <button
+            onClick={() => setView("settings")}
+            className="flex items-center justify-center rounded-full"
+            style={{ width: 44, height: 44, backgroundColor: THEME.paperDeep, color: THEME.crate, fontSize: 20 }}
+            aria-label="設定"
+          >
+            ⚙️
+          </button>
+        </div>
+        <HomeView />
         <div style={{ height: 40 }} />
+
+        {/* ---- 其他功能以彈出小視窗方式顯示，不整頁跳轉，關閉即回首頁 ---- */}
+        {!isHome && (
+          <div
+            className="fixed inset-0 flex items-end justify-center"
+            style={{ backgroundColor: "rgba(59,42,26,0.45)", zIndex: 40 }}
+            onClick={goHome}
+          >
+            <div
+              className="w-full flex flex-col"
+              style={{
+                maxWidth: 440,
+                maxHeight: "88vh",
+                backgroundColor: THEME.paper,
+                borderTopLeftRadius: 28,
+                borderTopRightRadius: 28,
+                overflowY: "auto",
+                boxShadow: "0 -8px 24px rgba(59,42,26,0.25)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-center pt-3 pb-1" style={{ flexShrink: 0 }}>
+                <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: THEME.line }} />
+              </div>
+              {view === "history" && (
+                <div className="px-5 pt-2">
+                  <button
+                    onClick={() => setView("monthReport")}
+                    className="w-full rounded-2xl mb-4 active:opacity-80"
+                    style={{ height: 54, backgroundColor: THEME.crate, color: THEME.white, fontSize: 16, fontWeight: 800 }}
+                  >
+                    📊 查看本月報表
+                  </button>
+                </div>
+              )}
+              <CurrentView />
+              <div style={{ height: 24 }} />
+            </div>
+          </div>
+        )}
+
         <EditModal />
         <ConfirmModal
           open={!!confirmModal}
