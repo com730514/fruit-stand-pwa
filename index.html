@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>水果攤記帳</title>
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#7A4E2D" />
+    <link rel="manifest" href="./manifest.json" />
+
+    <!-- iPhone 加入主畫面 -->
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="水果攤記帳" />
+
+    <link rel="icon" type="image/png" href="./icons/favicon.png" />
+
+    <!-- Tailwind (CDN 版本，最簡單免建置設定；日後可換成本地安裝版) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      html, body { margin: 0; padding: 0; background: #FBF5E9; }
+      #root { min-height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./src/main.jsx"></script>
+  </body>
+</html>
