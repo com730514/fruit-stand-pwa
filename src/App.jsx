@@ -1330,7 +1330,7 @@ export default function FruitStandApp() {
                 </div>
               )}
               <CurrentView />
-              <div style={{ height: 24 }} />
+              <div style={{ height: 70 }} />
             </div>
           </div>
         )}
