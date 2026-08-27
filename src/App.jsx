@@ -188,6 +188,42 @@ function GridPickButton({ emoji, label, onClick }) {
   );
 }
 
+function AccordionCard({ emoji, label, summary, bg, open, onToggle, children }) {
+  return (
+    <div
+      className="w-full rounded-2xl mb-4 overflow-hidden"
+      style={{
+        backgroundColor: bg || THEME.white,
+        border: `2px solid ${THEME.line}`,
+        boxShadow: "0 2px 0 rgba(122,78,45,0.08)",
+      }}
+    >
+      <button onClick={onToggle} className="w-full flex items-center px-5 active:opacity-70" style={{ height: 76 }}>
+        {emoji && <span style={{ fontSize: 34, marginRight: 16 }}>{emoji}</span>}
+        <div className="flex-1 text-left">
+          <div style={{ fontSize: 20, fontWeight: 800, color: THEME.ink }}>{label}</div>
+          {summary && <div style={{ fontSize: 15, color: THEME.crateSoft, marginTop: 2 }}>{summary}</div>}
+        </div>
+        <span
+          style={{
+            fontSize: 22,
+            color: THEME.crateSoft,
+            transform: open ? "rotate(90deg)" : "rotate(0deg)",
+            transition: "transform 0.2s",
+          }}
+        >
+          ›
+        </span>
+      </button>
+      {open && (
+        <div className="px-5 pb-5" style={{ borderTop: `2px solid ${THEME.line}`, paddingTop: 16 }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AmountEntry({ title, hint, value, onChange, onSave, onCancel, accentColor, alreadyMsg }) {
   return (
     <div className="px-5">
@@ -310,6 +346,14 @@ export default function FruitStandApp() {
   const [monthCursor, setMonthCursor] = useState(monthKey(todayStr()));
   const [newFruitName, setNewFruitName] = useState("");
   const [newFruitEmoji, setNewFruitEmoji] = useState("🍎");
+  const [openCard, setOpenCard] = useState(null); // null | "purchase" | "sale" | "expense"
+
+  const toggleCard = (id) => {
+    setPickedFruit(null);
+    setPickedCat(null);
+    setAmount("");
+    setOpenCard((prev) => (prev === id ? null : id));
+  };
 
   useEffect(() => {
     (async () => {
@@ -342,6 +386,7 @@ export default function FruitStandApp() {
     setAmount("");
     setSplitEntries([]);
     setSplitFruit(null);
+    setOpenCard(null);
   };
 
   /* ---------- 今日彙總 ---------- */
@@ -584,9 +629,159 @@ export default function FruitStandApp() {
         <div style={{ fontSize: 15 * scale, color: THEME.crateSoft, marginTop: 4 }}>{fmtDateZh(new Date())}</div>
       </div>
       <div className="px-5 mt-4">
-        <BigButton emoji="➕" label="今天進貨" color={THEME.purchase} bg={THEME.purchaseBg} onClick={() => setView("buyFruit")} />
-        <BigButton emoji="💰" label="今天賣多少" color={THEME.income} bg={THEME.incomeBg} onClick={() => setView("sellTotal")} />
-        <BigButton emoji="➖" label="其他支出" color={THEME.expense} bg={THEME.expenseBg} onClick={() => setView("expenseCat")} />
+        {/* ---- 今天進貨：展開／收合卡片 ---- */}
+        <AccordionCard
+          emoji="➕"
+          label="今天進貨"
+          bg={THEME.purchaseBg}
+          summary={todaySummary.purchase > 0 ? `今天已記 ${fmtMoney(todaySummary.purchase)} 元` : "還沒有記錄"}
+          open={openCard === "purchase"}
+          onToggle={() => toggleCard("purchase")}
+        >
+          {!pickedFruit ? (
+            <>
+              <div style={{ fontSize: 16 * scale, color: THEME.crateSoft, marginBottom: 12, fontWeight: 700 }}>先選水果</div>
+              <div className="grid grid-cols-3 gap-3">
+                {settings.fruits.map((f) => (
+                  <GridPickButton key={f.id} emoji={f.emoji} label={f.name} onClick={() => { setPickedFruit(f); setAmount(""); }} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 18 * scale, fontWeight: 800, color: THEME.ink, marginBottom: 6 }}>
+                {pickedFruit.emoji} {pickedFruit.name}　今天這批買多少錢？
+              </div>
+              <div
+                className="rounded-2xl flex items-center justify-center mb-4"
+                style={{ height: 90, backgroundColor: THEME.white, border: `2px solid ${THEME.line}` }}
+              >
+                <span style={{ fontSize: 30, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
+                <input
+                  autoFocus
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                  className="text-center bg-transparent outline-none"
+                  style={{ fontSize: 30, fontWeight: 800, color: THEME.ink, width: "55%" }}
+                />
+              </div>
+              <button
+                onClick={handleSaveBuy}
+                className="w-full rounded-2xl mb-3 active:opacity-80"
+                style={{ height: 58, backgroundColor: THEME.purchase, color: THEME.white, fontSize: 19, fontWeight: 800 }}
+              >
+                💾 儲存
+              </button>
+              <button
+                onClick={() => setPickedFruit(null)}
+                className="w-full text-center"
+                style={{ color: THEME.crateSoft, fontSize: 15 * scale, fontWeight: 700 }}
+              >
+                ‹ 重新選水果
+              </button>
+            </>
+          )}
+        </AccordionCard>
+
+        {/* ---- 今天賣多少：展開／收合卡片 ---- */}
+        <AccordionCard
+          emoji="💰"
+          label="今天賣多少"
+          bg={THEME.incomeBg}
+          summary={todaySummary.revenue > 0 ? `今天已記 ${fmtMoney(todaySummary.revenue)} 元` : "還沒有記錄"}
+          open={openCard === "sale"}
+          onToggle={() => toggleCard("sale")}
+        >
+          <div style={{ fontSize: 18 * scale, fontWeight: 800, color: THEME.ink, marginBottom: 6 }}>今天總共賣多少錢？</div>
+          <div
+            className="rounded-2xl flex items-center justify-center mb-4"
+            style={{ height: 90, backgroundColor: THEME.white, border: `2px solid ${THEME.line}` }}
+          >
+            <span style={{ fontSize: 30, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
+            <input
+              autoFocus
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
+              className="text-center bg-transparent outline-none"
+              style={{ fontSize: 30, fontWeight: 800, color: THEME.ink, width: "55%" }}
+            />
+          </div>
+          <button
+            onClick={handleSaveSellTotal}
+            className="w-full rounded-2xl mb-3 active:opacity-80"
+            style={{ height: 58, backgroundColor: THEME.income, color: THEME.white, fontSize: 19, fontWeight: 800 }}
+          >
+            💾 儲存
+          </button>
+          <button
+            onClick={() => { setSplitEntries([]); setAmount(""); setView("sellSplit"); }}
+            className="w-full text-center"
+            style={{ color: THEME.crateSoft, fontSize: 15 * scale, fontWeight: 700, textDecoration: "underline" }}
+          >
+            🍇 我要分水果記（選填）
+          </button>
+        </AccordionCard>
+
+        {/* ---- 其他支出：展開／收合卡片 ---- */}
+        <AccordionCard
+          emoji="➖"
+          label="其他支出"
+          bg={THEME.expenseBg}
+          summary={todaySummary.expense > 0 ? `今天已記 ${fmtMoney(todaySummary.expense)} 元` : "還沒有記錄"}
+          open={openCard === "expense"}
+          onToggle={() => toggleCard("expense")}
+        >
+          {!pickedCat ? (
+            <>
+              <div style={{ fontSize: 16 * scale, color: THEME.crateSoft, marginBottom: 12, fontWeight: 700 }}>選一個項目</div>
+              <div className="grid grid-cols-2 gap-3">
+                {EXPENSE_CATS.map((c) => (
+                  <GridPickButton key={c.id} emoji={c.emoji} label={c.name} onClick={() => { setPickedCat(c); setAmount(""); }} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 18 * scale, fontWeight: 800, color: THEME.ink, marginBottom: 6 }}>
+                {pickedCat.emoji} {pickedCat.name}　花了多少錢？
+              </div>
+              <div
+                className="rounded-2xl flex items-center justify-center mb-4"
+                style={{ height: 90, backgroundColor: THEME.white, border: `2px solid ${THEME.line}` }}
+              >
+                <span style={{ fontSize: 30, fontWeight: 800, color: THEME.crateSoft, marginRight: 4 }}>$</span>
+                <input
+                  autoFocus
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                  className="text-center bg-transparent outline-none"
+                  style={{ fontSize: 30, fontWeight: 800, color: THEME.ink, width: "55%" }}
+                />
+              </div>
+              <button
+                onClick={handleSaveExpense}
+                className="w-full rounded-2xl mb-3 active:opacity-80"
+                style={{ height: 58, backgroundColor: THEME.expense, color: THEME.white, fontSize: 19, fontWeight: 800 }}
+              >
+                💾 儲存
+              </button>
+              <button
+                onClick={() => setPickedCat(null)}
+                className="w-full text-center"
+                style={{ color: THEME.crateSoft, fontSize: 15 * scale, fontWeight: 700 }}
+              >
+                ‹ 重新選項目
+              </button>
+            </>
+          )}
+        </AccordionCard>
+
         <BigButton emoji="📖" label="查以前紀錄" color={THEME.crate} bg={THEME.white} onClick={() => setView("history")} />
       </div>
 
