@@ -128,10 +128,11 @@ function TopBar({ title, onBack, onSettings }) {
       {onBack ? (
         <button
           onClick={onBack}
-          className="flex items-center justify-center rounded-full"
-          style={{ width: 48, height: 48, backgroundColor: THEME.paperDeep, color: THEME.crate, fontSize: 26 }}
+          className="flex items-center rounded-full active:opacity-70"
+          style={{ height: 48, minWidth: 48, paddingLeft: 14, paddingRight: 16, backgroundColor: THEME.paperDeep, color: THEME.crate, fontSize: 17, fontWeight: 800, gap: 4 }}
         >
-          ←
+          <span style={{ fontSize: 24 }}>←</span>
+          <span>回首頁</span>
         </button>
       ) : (
         <div style={{ width: 48 }} />
@@ -1026,8 +1027,12 @@ export default function FruitStandApp() {
   const EditModal = () => {
     if (!editRecord) return null;
     return (
-      <div className="fixed inset-0 flex items-center justify-center px-6" style={{ backgroundColor: "rgba(59,42,26,0.45)", zIndex: 50 }}>
-        <div className="w-full rounded-2xl p-5" style={{ backgroundColor: THEME.white, maxWidth: 360 }}>
+      <div
+        className="fixed inset-0 flex items-center justify-center px-6"
+        style={{ backgroundColor: "rgba(59,42,26,0.45)", zIndex: 50 }}
+        onClick={() => setEditRecord(null)}
+      >
+        <div className="w-full rounded-2xl p-5" style={{ backgroundColor: THEME.white, maxWidth: 360 }} onClick={(e) => e.stopPropagation()}>
           <div style={{ fontSize: 19, fontWeight: 800, color: THEME.ink, marginBottom: 4 }}>
             {editRecord.emoji} {editRecord.fruit}
           </div>
